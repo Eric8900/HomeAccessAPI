@@ -22,38 +22,38 @@ async function login(username, password) {
         let browser = await puppeteer.launch(options);
         let page = await browser.newPage();
         await page.goto(loginLink, { waitUntil: 'networkidle0' });
-        const requestVerificationToken = await page.evaluate(() => {
-            const input = document.querySelector('input[name="__RequestVerificationToken"]');
-            return input ? input.value : '';
-        });
+        // const requestVerificationToken = await page.evaluate(() => {
+        //     const input = document.querySelector('input[name="__RequestVerificationToken"]');
+        //     return input ? input.value : '';
+        // });
 
-        const loginFields = {
-            '__RequestVerificationToken': requestVerificationToken,
-            'SCKTY00328510CustomEnabled': 'True',
-            'SCKTY00436568CustomEnabled': 'True',
-            'Database': '10',
-            'VerificationOption': 'UsernamePassword',
-            'LogOnDetails.UserName': username,
-            'tempUN': '',
-            'tempPW': '',
-            'LogOnDetails.Password': password,
-        };
+        // const loginFields = {
+        //     '__RequestVerificationToken': requestVerificationToken,
+        //     'SCKTY00328510CustomEnabled': 'True',
+        //     'SCKTY00436568CustomEnabled': 'True',
+        //     'Database': '10',
+        //     'VerificationOption': 'UsernamePassword',
+        //     'LogOnDetails.UserName': username,
+        //     'tempUN': '',
+        //     'tempPW': '',
+        //     'LogOnDetails.Password': password,
+        // };
 
-        for (const [key, value] of Object.entries(loginFields)) {
-        await page.type(`input[name="${key}"]`, value);
-        }
+        // for (const [key, value] of Object.entries(loginFields)) {
+        // await page.type(`input[name="${key}"]`, value);
+        // }
 
-        await Promise.all([
-            page.click('button[type="submit"]'),
-            page.waitForNavigation({ waitUntil: 'networkidle0' }),
-        ]);
+        // await Promise.all([
+        //     page.click('button[type="submit"]'),
+        //     page.waitForNavigation({ waitUntil: 'networkidle0' }),
+        // ]);
 
-        const currentUrl = await page.url();
-        if (currentUrl.includes('LogOn')) {
-            await browser.close();
-            throw new Error('Invalid username or password');
-        }
-        await page.goto(`https://homeaccess.katyisd.org/HomeAccess/Content/Student/Assignments.aspx`, { waitUntil : 'networkidle0'});
+        // const currentUrl = await page.url();
+        // if (currentUrl.includes('LogOn')) {
+        //     await browser.close();
+        //     throw new Error('Invalid username or password');
+        // }
+        // await page.goto(`https://homeaccess.katyisd.org/HomeAccess/Content/Student/Assignments.aspx`, { waitUntil : 'networkidle0'});
         const pageContent = await page.content();
         return pageContent;
     } catch (error) {
@@ -71,36 +71,37 @@ app.get('/api/home', (req, res) => {
 app.get('/api/getGrades', async (req, res) => {
     const { username, password } = req.query;
     let pageContent = await login(username, password);
+    res.json( {success : true, content : pageContent} );
     // console.log(pageContent);
-    const $ = cheerio.load(pageContent);
-    const classNames = [];
-    const grades = [];
+    // const $ = cheerio.load(pageContent);
+    // const classNames = [];
+    // const grades = [];
 
-    const assignmentClasses = $('.AssignmentClass');
+    // const assignmentClasses = $('.AssignmentClass');
 
-    assignmentClasses.each((i, elem) => {
-        const $elem = $(elem);
-        const name = $elem.find('.sg-header a').text().trim();
-        classNames.push(name);
+    // assignmentClasses.each((i, elem) => {
+    //     const $elem = $(elem);
+    //     const name = $elem.find('.sg-header a').text().trim();
+    //     classNames.push(name);
 
-        const $categories = $(`#plnMain_rptAssigmnetsByCourse_lblCategories_${i}`);
-        const classGrades = [];
+    //     const $categories = $(`#plnMain_rptAssigmnetsByCourse_lblCategories_${i}`);
+    //     const classGrades = [];
 
-        $categories.find('.sg-asp-table-data-row').each((j, elem2) => {
-            const $elem2 = $(elem2);
-            const category = [];
-            $elem2.find('td').each((k, elem3) => {
-                if (k !== 0) {
-                    category.push($(elem3).text().trim());
-                }
-            });
-            classGrades.push(category);
-        });
+    //     $categories.find('.sg-asp-table-data-row').each((j, elem2) => {
+    //         const $elem2 = $(elem2);
+    //         const category = [];
+    //         $elem2.find('td').each((k, elem3) => {
+    //             if (k !== 0) {
+    //                 category.push($(elem3).text().trim());
+    //             }
+    //         });
+    //         classGrades.push(category);
+    //     });
 
-        grades.push(classGrades);
-    });
+    //     grades.push(classGrades);
+    // });
 
-    res.json({ success: true, names: classNames, grades: grades });
+    // res.json({ success: true, names: classNames, grades: grades });
 });
 
 app.listen(PORT, () => {
