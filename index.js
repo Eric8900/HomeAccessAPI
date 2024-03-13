@@ -1,6 +1,6 @@
 const express = require('express');
 const puppeteer = require('puppeteer-core');
-const chrome = require('@sparticuz/chromium-min');
+const chrome = require('chrome-aws-lambda');
 const cheerio = require('cheerio');
 const app = express();
 
