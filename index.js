@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 async function login(username, password) {
-    const browser = await chromeLambda.puppeteer.launch({
+    const browser = await puppeteer.launch({
         args: [...chromeLambda.args, "--hide-scrollbars", "--disable-web-security"],
         defaultViewport: chromeLambda.defaultViewport,
         executablePath: await chromeLambda.executablePath,
