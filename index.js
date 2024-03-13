@@ -11,6 +11,8 @@ async function login(username, password) {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
+    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36');
+
     const loginLink = `https://homeaccess.katyisd.org/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2fClasses%2fClasswork`;
 
     try {
