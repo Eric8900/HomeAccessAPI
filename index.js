@@ -1,6 +1,6 @@
 const express = require('express');
 const puppeteer = require('puppeteer-core');
-const chromeLambda = require('chrome-aws-lambda');
+const chromium = require('chrome-aws-lambda');
 const cheerio = require('cheerio');
 const app = express();
 
@@ -9,18 +9,18 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 async function login(username, password) {
-    const browser = await puppeteer.launch({
-        args: [...chromeLambda.args, "--hide-scrollbars", "--disable-web-security"],
-        defaultViewport: chromeLambda.defaultViewport,
-        executablePath: await chromeLambda.executablePath,
-        headless: true,
-        ignoreHTTPSErrors: true,
-    });
-    const page = await browser.newPage();
 
     const loginLink = `https://homeaccess.katyisd.org/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2fClasses%2fClasswork`;
 
     try {
+        const browser = await chromium.puppeteer.launch({
+            args: chromium.args,
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath,
+            headless: chromium.headless,
+            ignoreHTTPSErrors: true,
+          });
+        const page = await browser.newPage();
         await page.goto(loginLink, { waitUntil: 'networkidle0' });
         const requestVerificationToken = await page.evaluate(() => {
             const input = document.querySelector('input[name="__RequestVerificationToken"]');
