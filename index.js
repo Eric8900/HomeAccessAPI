@@ -9,14 +9,15 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 async function login(username, password) {
-    let options = {
-        args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
+    
+    const executablePath = await chrome.executablePath;
+    const browser = await puppeteer.launch({
+        executablePath,
+        args: chrome.args,
         defaultViewport: chrome.defaultViewport,
-        executablePath: await chrome.executablePath,
         headless: true,
         ignoreHTTPSErrors: true,
-    };
-    let browser = await puppeteer.launch(options);
+    });
     let page = await browser.newPage();
     const loginLink = `https://homeaccess.katyisd.org/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2fClasses%2fClasswork`;
     try {
