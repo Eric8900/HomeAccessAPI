@@ -55,8 +55,10 @@ async function login(username, password) {
     }
 }
 
+app.get("/", (req, res) => res.send("Express on Vercel"));
+
 app.get('/api/home', (req, res) => {
-    res.json({ message: 'Welcome to the Home Access Center API!' });
+    res.json({ message: 'Welcome to the Home Access Center API!', routes : '/api/home, /api/getGrades' });
 });
 
 app.get('/api/getGrades', async (req, res) => {
@@ -97,3 +99,5 @@ app.get('/api/getGrades', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+module.exports = app;
