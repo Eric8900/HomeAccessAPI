@@ -18,27 +18,25 @@ async function login(username, password) {
     });
     const page = await browser.newPage();
 
-    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36');
-
     const loginLink = `https://homeaccess.katyisd.org/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2fClasses%2fClasswork`;
 
     try {
         await page.goto(loginLink, { waitUntil: 'networkidle0' });
         const requestVerificationToken = await page.evaluate(() => {
-        const input = document.querySelector('input[name="__RequestVerificationToken"]');
-        return input ? input.value : '';
+            const input = document.querySelector('input[name="__RequestVerificationToken"]');
+            return input ? input.value : '';
         });
 
         const loginFields = {
-        '__RequestVerificationToken': requestVerificationToken,
-        'SCKTY00328510CustomEnabled': 'True',
-        'SCKTY00436568CustomEnabled': 'True',
-        'Database': '10',
-        'VerificationOption': 'UsernamePassword',
-        'LogOnDetails.UserName': username,
-        'tempUN': '',
-        'tempPW': '',
-        'LogOnDetails.Password': password,
+            '__RequestVerificationToken': requestVerificationToken,
+            'SCKTY00328510CustomEnabled': 'True',
+            'SCKTY00436568CustomEnabled': 'True',
+            'Database': '10',
+            'VerificationOption': 'UsernamePassword',
+            'LogOnDetails.UserName': username,
+            'tempUN': '',
+            'tempPW': '',
+            'LogOnDetails.Password': password,
         };
 
         for (const [key, value] of Object.entries(loginFields)) {
@@ -46,14 +44,14 @@ async function login(username, password) {
         }
 
         await Promise.all([
-        page.click('button[type="submit"]'),
-        page.waitForNavigation({ waitUntil: 'networkidle0' }),
+            page.click('button[type="submit"]'),
+            page.waitForNavigation({ waitUntil: 'networkidle0' }),
         ]);
 
         const currentUrl = await page.url();
         if (currentUrl.includes('LogOn')) {
-        await browser.close();
-        throw new Error('Invalid username or password');
+            await browser.close();
+            throw new Error('Invalid username or password');
         }
         await page.goto(`https://homeaccess.katyisd.org/HomeAccess/Content/Student/Assignments.aspx`, { waitUntil : 'networkidle0'});
         const pageContent = await page.content();
