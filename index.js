@@ -1,5 +1,6 @@
 const express = require('express');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromeLambda = require('chrome-aws-lambda');
 const cheerio = require('cheerio');
 const app = express();
 
@@ -8,7 +9,13 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 async function login(username, password) {
-    const browser = await puppeteer.launch();
+    const browser = await chromeLambda.puppeteer.launch({
+        args: [...chromeLambda.args, "--hide-scrollbars", "--disable-web-security"],
+        defaultViewport: chromeLambda.defaultViewport,
+        executablePath: await chromeLambda.executablePath,
+        headless: true,
+        ignoreHTTPSErrors: true,
+    });
     const page = await browser.newPage();
 
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.125 Safari/537.36');
