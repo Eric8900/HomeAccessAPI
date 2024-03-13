@@ -16,11 +16,10 @@ async function login(username, password) {
         headless: true,
         ignoreHTTPSErrors: true,
     };
+    let browser = await puppeteer.launch(options);
+    let page = await browser.newPage();
     const loginLink = `https://homeaccess.katyisd.org/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2fClasses%2fClasswork`;
-
     try {
-        let browser = await puppeteer.launch(options);
-        let page = await browser.newPage();
         await page.goto(loginLink, { waitUntil: 'networkidle0' });
         const requestVerificationToken = await page.evaluate(() => {
             const input = document.querySelector('input[name="__RequestVerificationToken"]');
