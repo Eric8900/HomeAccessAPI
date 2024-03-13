@@ -111,6 +111,7 @@
 // module.exports = app;
 
 const app = require("express")();
+app.use(express.json());
 
 let chrome = {};
 let puppeteer;
