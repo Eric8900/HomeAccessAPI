@@ -1,0 +1,32 @@
+{
+  "name": "homeaccessapi",
+  "version": "1.0.0",
+  "description": "Home Access Center API",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js",
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eric8900/HomeAccessAPI.git"
+  },
+  "keywords": [
+    "none"
+  ],
+  "author": "Eric Chen",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/Eric8900/HomeAccessAPI/issues"
+  },
+  "homepage": "https://github.com/Eric8900/HomeAccessAPI#readme",
+  "dependencies": {
+    "axios": "^1.6.7",
+    "axios-cookiejar-support": "^5.0.0",
+    "cheerio": "^1.0.0-rc.12",
+    "express": "^4.18.3",
+    "nodemon": "^3.1.0",
+    "puppeteer": "^22.4.1",
+    "tough-cookie": "^4.1.3"
+  }
+}
