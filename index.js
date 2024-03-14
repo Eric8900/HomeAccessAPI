@@ -1,5 +1,5 @@
 const express = require('express');
-const { chromium } = require('@playwright/chromium');
+const chromium = require('playwright');
 const cheerio = require('cheerio');
 const app = express();
 
@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 async function login(username, password) {
-    const browser = await chromium.launch();
+    const browser = await chromium.chromium.launch();
     const context = await browser.newContext();
     const page = await context.newPage();
 
