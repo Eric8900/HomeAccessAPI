@@ -1,6 +1,5 @@
 const express = require('express');
-const puppeteer = require('puppeteer-core');
-const chrome = require('chrome-aws-lambda');
+const chromium = require('playwright');
 const cheerio = require('cheerio');
 const app = express();
 
@@ -9,52 +8,50 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 async function login(username, password) {
-    
-    const executablePath = await chrome.executablePath;
-    const browser = await puppeteer.launch({
-        executablePath,
-        args: chrome.args,
-        defaultViewport: chrome.defaultViewport,
-        headless: true,
-        ignoreHTTPSErrors: true,
-    });
-    let page = await browser.newPage();
+    const browser = await chromium.chromium.launch();
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
     const loginLink = `https://homeaccess.katyisd.org/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2fClasses%2fClasswork`;
     try {
-        await page.goto(loginLink, { waitUntil: 'networkidle0' });
+        await page.goto(loginLink);
         const requestVerificationToken = await page.evaluate(() => {
             const input = document.querySelector('input[name="__RequestVerificationToken"]');
             return input ? input.value : '';
         });
 
-        const loginFields = {
-            '__RequestVerificationToken': requestVerificationToken,
-            'SCKTY00328510CustomEnabled': 'True',
-            'SCKTY00436568CustomEnabled': 'True',
-            'Database': '10',
-            'VerificationOption': 'UsernamePassword',
-            'LogOnDetails.UserName': username,
-            'tempUN': '',
-            'tempPW': '',
-            'LogOnDetails.Password': password,
-        };
+        await page.evaluate(({ username, password, requestVerificationToken }) => {
+            const logonDetailsUserName = document.querySelector('input[name="LogOnDetails.UserName"]');
+            const logonDetailsPassword = document.querySelector('input[name="LogOnDetails.Password"]');
+            const sckty00328510CustomEnabled = document.querySelector('input[name="SCKTY00328510CustomEnabled"]');
+            const sckty00436568CustomEnabled = document.querySelector('input[name="SCKTY00436568CustomEnabled"]');
+            const database = document.querySelector('input[name="Database"]');
+            const verificationOption = document.querySelector('input[name="VerificationOption"]');
 
-        for (const [key, value] of Object.entries(loginFields)) {
-        await page.type(`input[name="${key}"]`, value);
-        }
+            if (logonDetailsUserName) logonDetailsUserName.value = username;
+            if (logonDetailsPassword) logonDetailsPassword.value = password;
+            if (sckty00328510CustomEnabled) sckty00328510CustomEnabled.value = 'True';
+            if (sckty00436568CustomEnabled) sckty00436568CustomEnabled.value = 'True';
+            if (database) database.value = '10';
+            if (verificationOption) verificationOption.value = 'UsernamePassword';
+
+            const requestVerificationTokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (requestVerificationTokenInput) requestVerificationTokenInput.value = requestVerificationToken;
+        }, { username, password, requestVerificationToken });
 
         await Promise.all([
             page.click('button[type="submit"]'),
-            page.waitForNavigation({ waitUntil: 'networkidle0' }),
+            page.waitForNavigation(),
         ]);
 
-        const currentUrl = await page.url();
+        const currentUrl = page.url();
         if (currentUrl.includes('LogOn')) {
             await browser.close();
             throw new Error('Invalid username or password');
         }
-        await page.goto(`https://homeaccess.katyisd.org/HomeAccess/Content/Student/Assignments.aspx`, { waitUntil : 'networkidle0'});
+        await page.goto(`https://homeaccess.katyisd.org/HomeAccess/Content/Student/Assignments.aspx`);
         const pageContent = await page.content();
+        await browser.close();
         return pageContent;
     } catch (error) {
         await browser.close();
@@ -71,7 +68,6 @@ app.get('/api/home', (req, res) => {
 app.get('/api/getGrades', async (req, res) => {
     const { username, password } = req.query;
     let pageContent = await login(username, password);
-    // console.log(pageContent);
     const $ = cheerio.load(pageContent);
     const classNames = [];
     const grades = [];
